@@ -62,6 +62,29 @@ Then rerun:
 ./scripts/start.sh
 ```
 
+## Claude CLI Is Not Authenticated
+
+If onboarding says:
+
+```text
+Claude CLI is not authenticated on this host.
+Run claude auth login first, then re-run this setup.
+```
+
+In Docker, "this host" means the OpenClaw container, not your Mac. For the lab, rerun setup and choose **Anthropic API key** instead of **Anthropic Claude CLI**.
+
+```bash
+./scripts/setup-local.sh
+```
+
+If you already have an Anthropic API key, you can add it to `.env` before rerunning:
+
+```text
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Claude CLI reuse is possible, but it requires making Claude CLI and its credentials available inside the container. That is more brittle than an API key for Docker Desktop and Azure VM labs.
+
 ## Permission Errors In data/
 
 The OpenClaw image runs as a non-root user. On Linux, fix ownership if needed:

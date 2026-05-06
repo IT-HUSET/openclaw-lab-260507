@@ -16,6 +16,20 @@ cp .env.example .env
 ./scripts/setup-local.sh
 ```
 
+## Provider Choice In Docker
+
+For Anthropic, choose **Anthropic API key** during Docker onboarding unless you specifically want to debug Claude CLI credential reuse inside the container.
+
+Claude CLI reuse works best when OpenClaw runs directly on the same host where `claude` is installed and authenticated. In this lab, onboarding runs inside a Linux container. That container cannot automatically see a macOS Claude Code login, especially when credentials are stored in Keychain. An Anthropic API key is therefore the clearest and least surprising path for Docker Desktop and Azure VM labs.
+
+You can either paste the key when onboarding prompts you, or set it in `.env` before setup:
+
+```text
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Do not commit `.env`.
+
 The setup script:
 
 - Generates `OPENCLAW_GATEWAY_TOKEN` if missing.
