@@ -2,11 +2,11 @@
 
 ## Before The Lab
 
-- Confirm Docker Desktop or Docker Engine is installed.
-- Confirm `docker compose version` works.
+- Confirm Docker Desktop or Docker Engine is installed if using a Docker path.
+- Confirm `docker compose version` works if using a Docker path.
 - Confirm each participant has a model provider API key.
-- Decide whether participants use local Docker, a shared Docker host, or an Azure VM.
-- If using a shared host, assign each participant an id and port pair.
+- Decide whether participants use local Docker, a shared Docker host, native multi-gateway, or an Azure VM.
+- If using a shared host, assign each participant an id and port plan.
 - Review the safety notes in `docs/security.md`.
 
 ## Local Docker Setup
@@ -30,6 +30,16 @@
 - Participant completes OpenClaw onboarding in SSH.
 - Participant opens `http://<host-ip>:<port>/` from their own browser.
 - Participant uses `./scripts/instance.sh <id> <command>` for later commands.
+
+## Native Multi-Gateway Setup
+
+- Confirm OpenClaw is installed directly under the shared account, for example `multi-claw`.
+- Confirm the shared host IP or DNS name, for example `172.24.110.136`.
+- Assign each participant a profile id and base port, leaving at least 20 ports between gateways.
+- Participant SSHes into the shared host.
+- Participant runs `openclaw --profile <id> onboard`.
+- Participant runs `openclaw --profile <id> gateway install --port <port>`.
+- Participant opens `http://<host-ip>:<port>/` from their own browser.
 
 ## Azure VM Setup
 

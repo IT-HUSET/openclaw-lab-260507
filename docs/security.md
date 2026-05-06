@@ -24,7 +24,9 @@ OpenClaw is powerful because it can use tools, run commands, and connect to acco
 
 For a VM, prefer SSH tunnels, VPN/tailnet access, or Azure Bastion. If you intentionally publish the gateway beyond localhost, require gateway authentication and review the OpenClaw hardening docs first.
 
-For a same-network shared-host lab, bind each participant instance to the host's lab-network IP, use unique gateway tokens, and keep the network trusted. This is workshop isolation, not strong multi-tenant isolation.
+For a same-network shared Docker host lab, publish each participant instance only on the trusted lab network, use unique gateway tokens, and keep the network trusted. This is workshop isolation, not strong multi-tenant isolation.
+
+For a native multi-gateway lab under one macOS account, remember that OpenClaw profiles separate gateway state but do not create Unix-level isolation between participants sharing the same account.
 
 ## Secrets
 

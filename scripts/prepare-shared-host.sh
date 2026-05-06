@@ -14,7 +14,7 @@ Examples:
 Creates per-participant env files under instances/ and writes instances/roster.tsv.
 It does not run OpenClaw onboarding. Participants run setup-shared-instance.sh themselves.
 
-publish-host defaults to 0.0.0.0 for shared-host labs. host-ip-or-dns is the
+publish-host defaults to 0.0.0.0 for shared Docker host labs. host-ip-or-dns is the
 address participants open in their browsers.
 EOF
   exit 1

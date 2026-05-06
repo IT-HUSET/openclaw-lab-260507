@@ -10,7 +10,7 @@ Example:
   ./scripts/setup-shared-instance.sh alice 18789 172.24.110.136
 
 The participant-id must be lowercase letters, numbers, or hyphens.
-publish-host defaults to 0.0.0.0 for shared-host labs.
+publish-host defaults to 0.0.0.0 for shared Docker host labs.
 EOF
   exit 1
 }
