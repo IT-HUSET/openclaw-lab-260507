@@ -1,0 +1,10 @@
+.env
+resources/azure.env
+data/
+logs/
+*.log
+.DS_Store
+.idea/
+.vscode/
+docker-compose.override.yml
+compose.override.yaml
