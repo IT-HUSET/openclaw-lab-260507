@@ -5,7 +5,8 @@
 - Confirm Docker Desktop or Docker Engine is installed.
 - Confirm `docker compose version` works.
 - Confirm each participant has a model provider API key.
-- Decide whether participants use local Docker only or an Azure VM.
+- Decide whether participants use local Docker, a shared Docker host, or an Azure VM.
+- If using a shared host, assign each participant an id and port pair.
 - Review the safety notes in `docs/security.md`.
 
 ## Local Docker Setup
@@ -17,6 +18,18 @@
 - Run `./scripts/health.sh`.
 - Run `./scripts/dashboard.sh`.
 - Open `http://127.0.0.1:18789/`.
+
+## Shared Docker Host Setup
+
+- Confirm the shared host has Docker and this repository.
+- Confirm the shared host IP or DNS name, for example `172.24.110.136`.
+- Run `./scripts/prepare-shared-host.sh 20 172.24.110.136`.
+- Share each participant's assigned row from `instances/roster.tsv`.
+- Participant SSHes into the shared host.
+- Participant runs `./scripts/setup-shared-instance.sh <id> <port> <host-ip>`.
+- Participant completes OpenClaw onboarding in SSH.
+- Participant opens `http://<host-ip>:<port>/` from their own browser.
+- Participant uses `./scripts/instance.sh <id> <command>` for later commands.
 
 ## Azure VM Setup
 

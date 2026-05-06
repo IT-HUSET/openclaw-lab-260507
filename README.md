@@ -1,13 +1,13 @@
 # OpenClaw Getting Started Lab
 
-This repository is a lab kit for running [OpenClaw](https://docs.openclaw.ai) in a Docker container on a participant's computer, with optional notes and scripts for an Azure Linux VM.
+This repository is a lab kit for running [OpenClaw](https://docs.openclaw.ai) in Docker, either on a participant's computer or as multiple participant instances on one shared Docker host. Azure VM notes are included as a backup path.
 
 The default path is intentionally conservative:
 
 - Run the OpenClaw Gateway in Docker Compose.
 - Persist state under `./data/`, which is ignored by git.
 - Publish the gateway only on `127.0.0.1:18789` by default.
-- Use an SSH tunnel or Azure Bastion for remote access instead of exposing the gateway publicly.
+- For shared-host labs, publish only to the trusted lab network and give each participant a separate token, port, config folder, and Compose project.
 
 ## Quick Start
 
@@ -46,6 +46,41 @@ Useful commands:
 ./scripts/start.sh
 ```
 
+## Shared Docker Host
+
+Use this when participants cannot run Docker locally. The participant SSHes into the shared host, runs onboarding in the terminal, and opens the assigned URL from their own browser.
+
+Example for a host at `172.24.110.136`:
+
+Prepare 20 participant slots:
+
+```bash
+./scripts/prepare-shared-host.sh 20 172.24.110.136
+```
+
+Then each participant runs their assigned onboarding command. Example:
+
+```bash
+./scripts/setup-shared-instance.sh p01 18789 172.24.110.136
+```
+
+When setup finishes, participant `p01` opens:
+
+```text
+http://172.24.110.136:18789/
+```
+
+Later commands:
+
+```bash
+./scripts/instance.sh p01 dashboard
+./scripts/instance.sh p01 health
+./scripts/instance.sh p01 cli doctor
+./scripts/instance.sh p01 logs
+```
+
+See [docs/shared-host.md](docs/shared-host.md).
+
 ## Repository Layout
 
 ```text
@@ -60,9 +95,13 @@ Useful commands:
 |   |-- logs.sh
 |   |-- dashboard.sh
 |   |-- cli.sh
+|   |-- setup-shared-instance.sh
+|   |-- prepare-shared-host.sh
+|   |-- instance.sh
 |   `-- azure/
 |-- docs/
 |   |-- local-docker.md
+|   |-- shared-host.md
 |   |-- azure-vm.md
 |   |-- security.md
 |   `-- troubleshooting.md

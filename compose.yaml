@@ -2,7 +2,7 @@ services:
   openclaw-gateway:
     image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
     env_file:
-      - path: .env
+      - path: ${OPENCLAW_CONTAINER_ENV_FILE:-.env}
         required: false
     environment:
       HOME: /home/node
@@ -50,7 +50,7 @@ services:
     image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
     network_mode: "service:openclaw-gateway"
     env_file:
-      - path: .env
+      - path: ${OPENCLAW_CONTAINER_ENV_FILE:-.env}
         required: false
     environment:
       HOME: /home/node

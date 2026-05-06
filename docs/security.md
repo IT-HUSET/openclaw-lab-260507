@@ -24,6 +24,8 @@ OpenClaw is powerful because it can use tools, run commands, and connect to acco
 
 For a VM, prefer SSH tunnels, VPN/tailnet access, or Azure Bastion. If you intentionally publish the gateway beyond localhost, require gateway authentication and review the OpenClaw hardening docs first.
 
+For a same-network shared-host lab, bind each participant instance to the host's lab-network IP, use unique gateway tokens, and keep the network trusted. This is workshop isolation, not strong multi-tenant isolation.
+
 ## Secrets
 
 The `.env` file is ignored by git. Do not commit:

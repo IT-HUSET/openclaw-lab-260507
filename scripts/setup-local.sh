@@ -11,15 +11,17 @@ require_cmd docker
 docker compose version >/dev/null 2>&1 || die "Docker Compose v2 is required"
 
 if [[ ! -f "$ENV_FILE" ]]; then
+  mkdir -p "$(dirname "$ENV_FILE")"
   cp "$ROOT_DIR/.env.example" "$ENV_FILE"
-  echo "Created .env from .env.example"
+  echo "Created $ENV_FILE from .env.example"
 fi
 
 token="$(env_value OPENCLAW_GATEWAY_TOKEN)"
 if [[ -z "$token" ]]; then
   token="$(generate_token)"
   set_env_value OPENCLAW_GATEWAY_TOKEN "$token"
-  echo "Generated OPENCLAW_GATEWAY_TOKEN in .env"
+  chmod 600 "$ENV_FILE" || true
+  echo "Generated OPENCLAW_GATEWAY_TOKEN in $ENV_FILE"
 fi
 
 config_dir="$(env_value OPENCLAW_CONFIG_DIR)"
@@ -44,7 +46,14 @@ gateway_port="$(env_value OPENCLAW_GATEWAY_PORT)"
 gateway_port="${gateway_port:-18789}"
 gateway_bind="$(env_value OPENCLAW_GATEWAY_BIND)"
 gateway_bind="${gateway_bind:-lan}"
-allowed_origins="[\"http://localhost:${gateway_port}\",\"http://127.0.0.1:${gateway_port}\"]"
+public_host="$(env_value OPENCLAW_PUBLIC_HOST)"
+publish_host="$(env_value OPENCLAW_PUBLISH_HOST)"
+public_host="${public_host:-${publish_host:-127.0.0.1}}"
+allowed_origins="[\"http://localhost:${gateway_port}\",\"http://127.0.0.1:${gateway_port}\""
+if [[ "$public_host" != "127.0.0.1" && "$public_host" != "localhost" && "$public_host" != "0.0.0.0" ]]; then
+  allowed_origins="${allowed_origins},\"http://${public_host}:${gateway_port}\""
+fi
+allowed_origins="${allowed_origins}]"
 
 echo "Applying Docker gateway defaults..."
 compose run --rm --no-deps --entrypoint node openclaw-gateway \
@@ -55,7 +64,14 @@ echo "Starting OpenClaw Gateway..."
 compose up -d openclaw-gateway
 
 echo
-echo "Gateway URL: http://127.0.0.1:${gateway_port}/"
-echo "Health:      ./scripts/health.sh"
-echo "Dashboard:   ./scripts/dashboard.sh"
+command_prefix=""
+if [[ -n "${OPENCLAW_ENV_FILE:-}" ]]; then
+  command_prefix="${command_prefix}OPENCLAW_ENV_FILE=${OPENCLAW_ENV_FILE} "
+fi
+if [[ -n "${OPENCLAW_COMPOSE_PROJECT:-}" ]]; then
+  command_prefix="${command_prefix}OPENCLAW_COMPOSE_PROJECT=${OPENCLAW_COMPOSE_PROJECT} "
+fi
+echo "Gateway URL: http://${public_host}:${gateway_port}/"
+echo "Health:      ${command_prefix}./scripts/health.sh"
+echo "Dashboard:   ${command_prefix}./scripts/dashboard.sh"
 echo "Token:       $token"

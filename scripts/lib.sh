@@ -6,8 +6,14 @@ repo_root() {
 }
 
 ROOT_DIR="$(repo_root)"
-ENV_FILE="$ROOT_DIR/.env"
+ENV_FILE_INPUT="${OPENCLAW_ENV_FILE:-$ROOT_DIR/.env}"
+if [[ "$ENV_FILE_INPUT" = /* ]]; then
+  ENV_FILE="$ENV_FILE_INPUT"
+else
+  ENV_FILE="$ROOT_DIR/$ENV_FILE_INPUT"
+fi
 COMPOSE_FILE="$ROOT_DIR/compose.yaml"
+COMPOSE_PROJECT="${OPENCLAW_COMPOSE_PROJECT:-}"
 
 die() {
   echo "ERROR: $*" >&2
@@ -19,23 +25,33 @@ require_cmd() {
 }
 
 ensure_env_file() {
-  [[ -f "$ENV_FILE" ]] || die "Missing .env. Run: cp .env.example .env"
+  [[ -f "$ENV_FILE" ]] || die "Missing env file: $ENV_FILE"
 }
 
 compose() {
-  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+  local args=()
+  if [[ -n "$COMPOSE_PROJECT" ]]; then
+    args+=(--project-name "$COMPOSE_PROJECT")
+  fi
+  docker compose "${args[@]}" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
 }
 
-env_value() {
-  local key="$1"
-  if [[ -f "$ENV_FILE" ]]; then
-    awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; found=1 } END { if (!found) exit 1 }' "$ENV_FILE" || true
+env_value_from() {
+  local file="$1"
+  local key="$2"
+  if [[ -f "$file" ]]; then
+    awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; found=1 } END { if (!found) exit 1 }' "$file" || true
   fi
 }
 
-set_env_value() {
-  local key="$1"
-  local value="$2"
+env_value() {
+  env_value_from "$ENV_FILE" "$1"
+}
+
+set_env_value_in() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
   local tmp
   tmp="$(mktemp)"
   awk -v key="$key" -v value="$value" '
@@ -51,8 +67,12 @@ set_env_value() {
         print key "=" value
       }
     }
-  ' "$ENV_FILE" > "$tmp"
-  mv "$tmp" "$ENV_FILE"
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+set_env_value() {
+  set_env_value_in "$ENV_FILE" "$1" "$2"
 }
 
 generate_token() {
