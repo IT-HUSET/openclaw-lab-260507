@@ -26,8 +26,11 @@ config_dir="$(env_value OPENCLAW_CONFIG_DIR)"
 workspace_dir="$(env_value OPENCLAW_WORKSPACE_DIR)"
 mkdir -p "${config_dir:-./data/config}" "${workspace_dir:-./data/workspace}"
 
-echo "Pulling OpenClaw image..."
-compose pull openclaw-gateway openclaw-cli
+openclaw_image="$(env_value OPENCLAW_IMAGE)"
+openclaw_image="${openclaw_image:-ghcr.io/openclaw/openclaw:latest}"
+
+echo "Pulling OpenClaw image: $openclaw_image"
+docker pull "$openclaw_image"
 
 if [[ "${OPENCLAW_SKIP_ONBOARDING:-}" == "1" ]]; then
   echo "Skipping onboarding because OPENCLAW_SKIP_ONBOARDING=1"

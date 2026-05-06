@@ -10,6 +10,24 @@ If this fails, install Docker Desktop or the Docker Compose v2 plugin.
 
 ## Image Pull Fails
 
+The first setup can look quiet for a while while Docker Desktop pulls the OpenClaw image. The image is large, so wait until Docker reaches the full size and prints that the pull completed.
+
+If the progress does not move for several minutes, stop with `Ctrl-C` and pull the image directly:
+
+```bash
+docker pull ghcr.io/openclaw/openclaw:latest
+```
+
+If that also stalls at the same byte count, restart Docker Desktop and retry the same command. Docker usually reuses the already downloaded layers.
+
+Then rerun setup:
+
+```bash
+./scripts/setup-local.sh
+```
+
+The script will reuse the existing `.env` and continue from the next step.
+
 Check the image name:
 
 ```bash
