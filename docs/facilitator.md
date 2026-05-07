@@ -145,13 +145,15 @@ For most workshops, Remote-SSH plus `scp` is enough and needs no host prep beyon
 
 If everyone logs in as the same Unix account (for example `multi-claw`), there is no isolation. Acceptable for trusted-colleague workshops; not acceptable if participants should not see one another's API keys, tokens, or workspace files.
 
-For real isolation on the shared Docker host, create one macOS user per participant and scope ownership of `instances/pNN/` accordingly:
+For real isolation on the shared Docker host, create one macOS user per participant and scope ownership of both `instances/pNN/` and the matching `instances/pNN.env` file:
 
 ```bash
 # On the shared macOS host, per participant
 sudo sysadminctl -addUser participant01 -fullName "Participant 01" -password -
-sudo chown -R participant01:staff /Users/multi-claw/openclaw-getting-started/instances/p01
-sudo chmod 750 /Users/multi-claw/openclaw-getting-started/instances/p01
+sudo chown -R participant01:staff /Users/multi-claw/openclaw-getting-started/instances/p01 \
+  /Users/multi-claw/openclaw-getting-started/instances/p01.env
+sudo chmod 700 /Users/multi-claw/openclaw-getting-started/instances/p01
+sudo chmod 600 /Users/multi-claw/openclaw-getting-started/instances/p01.env
 ```
 
 Native multi-gateway is harder to isolate because OpenClaw's profile directories live under a single user's home. Either accept the trusted-lab posture or use POSIX ACLs:

@@ -94,6 +94,12 @@ lab_auth_choice() {
     printf 'gemini-api-key\n'
   elif [[ -n "$(lab_value "$participant_id" MISTRAL_API_KEY)" ]]; then
     printf 'mistral-api-key\n'
+  elif [[ -n "$(lab_value "$participant_id" MOONSHOT_API_KEY)" ]]; then
+    printf 'moonshot-api-key\n'
+  elif [[ -n "$(lab_value "$participant_id" ZAI_API_KEY)" ]]; then
+    printf 'zai-api-key\n'
+  elif [[ -n "$(lab_value "$participant_id" AI_GATEWAY_API_KEY)" ]]; then
+    printf 'ai-gateway-api-key\n'
   elif [[ -n "$(lab_value "$participant_id" CUSTOM_API_KEY)" ]]; then
     printf 'custom-api-key\n'
   else
