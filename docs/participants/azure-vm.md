@@ -47,7 +47,7 @@ Inside the VM:
 
 ```bash
 cp .env.example .env
-./scripts/setup-local.sh
+./scripts/local-docker/setup.sh
 ```
 
 Keep `OPENCLAW_PUBLISH_HOST=127.0.0.1`. Do not publish `18789` to the public internet.

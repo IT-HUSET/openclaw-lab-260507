@@ -23,7 +23,7 @@ If that also stalls at the same byte count, restart Docker Desktop and retry the
 Then rerun setup:
 
 ```bash
-./scripts/setup-local.sh
+./scripts/local-docker/setup.sh
 ```
 
 The script will reuse the existing `.env` and continue from the next step.
@@ -40,8 +40,8 @@ If your network blocks GitHub Container Registry, build from the upstream OpenCl
 ## Gateway Is Not Healthy
 
 ```bash
-./scripts/logs.sh
-./scripts/health.sh
+./scripts/local-docker/logs.sh
+./scripts/local-docker/health.sh
 ```
 
 Check whether the port is already in use:
@@ -59,7 +59,7 @@ OPENCLAW_GATEWAY_PORT=18791
 Then rerun:
 
 ```bash
-./scripts/start.sh
+./scripts/local-docker/start.sh
 ```
 
 ## Claude CLI Is Not Authenticated
@@ -74,7 +74,7 @@ Run claude auth login first, then re-run this setup.
 In Docker, "this host" means the OpenClaw container, not your Mac. For the lab, rerun setup and choose **Anthropic API key** instead of **Anthropic Claude CLI**.
 
 ```bash
-./scripts/setup-local.sh
+./scripts/local-docker/setup.sh
 ```
 
 If you already have an Anthropic API key, you can add it to `.env` before rerunning:
@@ -98,20 +98,35 @@ sudo chown -R 1000:1000 data/config data/workspace
 Ask OpenClaw for a fresh dashboard URL:
 
 ```bash
-./scripts/dashboard.sh
+./scripts/local-docker/dashboard.sh
 ```
 
 List and approve devices if needed:
 
 ```bash
-./scripts/cli.sh devices list
-./scripts/cli.sh devices approve <request-id>
+./scripts/local-docker/cli.sh devices list
+./scripts/local-docker/cli.sh devices approve <request-id>
+```
+
+## Local Docker Setup Printed A URL But Nothing Is Listening
+
+If onboarding prints a Control UI URL with:
+
+```text
+Gateway: not detected (connect ECONNREFUSED 127.0.0.1:18789)
+```
+
+that URL came from the onboarding container before Docker published the gateway port. Finish setup by exiting the OpenClaw TUI in that terminal, then rerun the Docker setup completion path:
+
+```bash
+OPENCLAW_SKIP_ONBOARDING=1 ./scripts/local-docker/setup.sh
+./scripts/local-docker/health.sh
 ```
 
 ## Reset Local State
 
 ```bash
-./scripts/stop.sh
+./scripts/local-docker/stop.sh
 rm -rf data/
-./scripts/setup-local.sh
+./scripts/local-docker/setup.sh
 ```

@@ -4,15 +4,15 @@ set -euo pipefail
 usage() {
   cat >&2 <<'EOF'
 Usage:
-  ./scripts/prepare-shared-host.sh <count> <host-ip-or-dns> [start-gateway-port] [participant-prefix] [port-step] [publish-host]
+  ./scripts/shared-docker-host/prepare.sh <count> <host-ip-or-dns> [start-gateway-port] [participant-prefix] [port-step] [publish-host]
 
 Examples:
-  ./scripts/prepare-shared-host.sh 20 172.24.110.136
-  ./scripts/prepare-shared-host.sh 20 172.24.110.136 18789 p 100
-  ./scripts/prepare-shared-host.sh 12 openclaw-lab.local 18789 team- 100
+  ./scripts/shared-docker-host/prepare.sh 20 172.24.110.136
+  ./scripts/shared-docker-host/prepare.sh 20 172.24.110.136 18789 p 20
+  ./scripts/shared-docker-host/prepare.sh 12 openclaw-lab.local 18789 team- 20
 
 Creates per-participant env files under instances/ and writes instances/roster.tsv.
-It does not run OpenClaw onboarding. Participants run setup-shared-instance.sh themselves.
+It does not run OpenClaw onboarding. Participants run scripts/shared-docker-host/setup-instance.sh themselves.
 
 publish-host defaults to 0.0.0.0 for shared Docker host labs. host-ip-or-dns is the
 address participants open in their browsers.
@@ -26,7 +26,7 @@ COUNT="$1"
 HOST_NAME="$2"
 START_PORT="${3:-18789}"
 PARTICIPANT_PREFIX="${4:-p}"
-PORT_STEP="${5:-100}"
+PORT_STEP="${5:-20}"
 PUBLISH_HOST="${6:-0.0.0.0}"
 
 [[ "$COUNT" =~ ^[0-9]+$ ]] || usage
@@ -38,7 +38,9 @@ PUBLISH_HOST="${6:-0.0.0.0}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/lib.sh"
+source "$SCRIPT_DIR/../common/lib.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../common/preconfigure.sh"
 
 cd "$ROOT_DIR"
 
@@ -79,6 +81,8 @@ for i in $(seq 1 "$COUNT"); do
     set_env_value_in "$instance_env" OPENCLAW_GATEWAY_TOKEN "$token"
   fi
 
+  apply_lab_secrets_to_env_file "$participant_id" "$instance_env"
+
   set_env_value_in "$instance_env" OPENCLAW_CONTAINER_ENV_FILE "./$instance_env_rel"
   set_env_value_in "$instance_env" OPENCLAW_CONFIG_DIR "./instances/${participant_id}/config"
   set_env_value_in "$instance_env" OPENCLAW_WORKSPACE_DIR "./instances/${participant_id}/workspace"
@@ -90,7 +94,11 @@ for i in $(seq 1 "$COUNT"); do
 
   mkdir -p "$ROOT_DIR/instances/$participant_id/config" "$ROOT_DIR/instances/$participant_id/workspace"
 
-  onboarding_command="./scripts/setup-shared-instance.sh $participant_id $gateway_port $HOST_NAME"
+  if [[ "$PARTICIPANT_PREFIX" == "p" && "$START_PORT" == "18789" && "$PORT_STEP" == "20" ]]; then
+    onboarding_command="./scripts/shared-docker-host/setup-instance.sh $i $HOST_NAME $PUBLISH_HOST"
+  else
+    onboarding_command="./scripts/shared-docker-host/setup-instance.sh $participant_id $gateway_port $HOST_NAME $PUBLISH_HOST"
+  fi
   url="http://${HOST_NAME}:${gateway_port}/"
   printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
     "$participant_id" \
@@ -110,4 +118,8 @@ column -t -s $'\t' "$ROSTER" 2>/dev/null || cat "$ROSTER"
 echo
 echo "Participant command example:"
 first_id="${PARTICIPANT_PREFIX}$(printf "%02d" 1)"
-echo "  ./scripts/setup-shared-instance.sh $first_id $START_PORT $HOST_NAME"
+if [[ "$PARTICIPANT_PREFIX" == "p" && "$START_PORT" == "18789" && "$PORT_STEP" == "20" ]]; then
+  echo "  ./scripts/shared-docker-host/setup-instance.sh 1 $HOST_NAME $PUBLISH_HOST"
+else
+  echo "  ./scripts/shared-docker-host/setup-instance.sh $first_id $START_PORT $HOST_NAME $PUBLISH_HOST"
+fi

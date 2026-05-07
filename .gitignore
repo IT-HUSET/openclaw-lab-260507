@@ -1,5 +1,6 @@
 .env
 resources/azure.env
+resources/lab-secrets.env
 data/
 instances/
 logs/

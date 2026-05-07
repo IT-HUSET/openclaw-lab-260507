@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/lib.sh"
+source "$SCRIPT_DIR/../common/lib.sh"
 
 ensure_env_file
 cd "$ROOT_DIR"
-compose logs -f openclaw-gateway
+compose down

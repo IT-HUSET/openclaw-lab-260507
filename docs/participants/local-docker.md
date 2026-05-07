@@ -13,7 +13,7 @@ This path runs the OpenClaw Gateway in Docker and keeps all OpenClaw state under
 
 ```bash
 cp .env.example .env
-./scripts/setup-local.sh
+./scripts/local-docker/setup.sh
 ```
 
 ## Provider Choice In Docker
@@ -35,25 +35,25 @@ The setup script:
 - Generates `OPENCLAW_GATEWAY_TOKEN` if missing.
 - Creates `data/config` and `data/workspace`.
 - Pulls the OpenClaw container image.
-- Runs interactive OpenClaw onboarding.
+- Runs interactive OpenClaw onboarding without opening the final Control UI/TUI step.
 - Pins Docker-friendly gateway settings.
 - Starts the gateway.
 
 ## Daily Commands
 
 ```bash
-./scripts/start.sh
-./scripts/stop.sh
-./scripts/logs.sh
-./scripts/health.sh
-./scripts/cli.sh doctor
-./scripts/security-audit.sh
+./scripts/local-docker/start.sh
+./scripts/local-docker/stop.sh
+./scripts/local-docker/logs.sh
+./scripts/local-docker/health.sh
+./scripts/local-docker/cli.sh doctor
+./scripts/local-docker/security-audit.sh
 ```
 
 ## Open The Dashboard
 
 ```bash
-./scripts/dashboard.sh
+./scripts/local-docker/dashboard.sh
 ```
 
 The command prints the dashboard URL. If you open the Control UI directly, use:
@@ -67,9 +67,9 @@ http://127.0.0.1:18789/
 After the gateway is running:
 
 ```bash
-./scripts/cli.sh channels login
-./scripts/cli.sh channels add --channel telegram --token "<token>"
-./scripts/cli.sh channels add --channel discord --token "<token>"
+./scripts/local-docker/cli.sh channels login
+./scripts/local-docker/cli.sh channels add --channel telegram --token "<token>"
+./scripts/local-docker/cli.sh channels add --channel discord --token "<token>"
 ```
 
 Use dedicated test accounts and bot tokens for lab work.
@@ -79,7 +79,7 @@ Use dedicated test accounts and bot tokens for lab work.
 Stop the gateway:
 
 ```bash
-./scripts/stop.sh
+./scripts/local-docker/stop.sh
 ```
 
 Then remove local OpenClaw state:

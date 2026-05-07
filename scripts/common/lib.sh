@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root() {
-  cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
+  cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd
 }
 
 ROOT_DIR="$(repo_root)"
@@ -33,7 +33,11 @@ compose() {
   if [[ -n "$COMPOSE_PROJECT" ]]; then
     args+=(--project-name "$COMPOSE_PROJECT")
   fi
-  docker compose "${args[@]}" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+  if [[ ${#args[@]} -gt 0 ]]; then
+    docker compose "${args[@]}" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+  else
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+  fi
 }
 
 env_value_from() {
