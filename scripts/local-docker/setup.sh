@@ -61,9 +61,15 @@ fi
 public_host="$(env_value OPENCLAW_PUBLIC_HOST)"
 publish_host="$(env_value OPENCLAW_PUBLISH_HOST)"
 public_host="${public_host:-${publish_host:-127.0.0.1}}"
-allowed_origins="[\"http://localhost:${gateway_port}\",\"http://127.0.0.1:${gateway_port}\""
+tls_enabled="$(env_value OPENCLAW_LAB_TLS)"
+if [[ "$tls_enabled" == "1" ]]; then
+  origin_scheme="https"
+else
+  origin_scheme="http"
+fi
+allowed_origins="[\"${origin_scheme}://localhost:${gateway_port}\",\"${origin_scheme}://127.0.0.1:${gateway_port}\""
 if [[ "$public_host" != "127.0.0.1" && "$public_host" != "localhost" && "$public_host" != "0.0.0.0" ]]; then
-  allowed_origins="${allowed_origins},\"http://${public_host}:${gateway_port}\""
+  allowed_origins="${allowed_origins},\"${origin_scheme}://${public_host}:${gateway_port}\""
 fi
 allowed_origins="${allowed_origins}]"
 
@@ -72,10 +78,26 @@ compose run --rm --no-deps --entrypoint node openclaw-gateway \
   dist/index.js config set --batch-json \
   "[{\"path\":\"gateway.mode\",\"value\":\"local\"},{\"path\":\"gateway.bind\",\"value\":\"${gateway_bind}\"},{\"path\":\"gateway.controlUi.allowedOrigins\",\"value\":${allowed_origins}}]"
 
+if [[ "$tls_enabled" == "1" ]]; then
+  literal_token="$(env_value OPENCLAW_GATEWAY_TOKEN)"
+  echo "Enabling gateway TLS (autoGenerate self-signed cert) and literal token..."
+  compose run --rm --no-deps --entrypoint node openclaw-gateway \
+    dist/index.js config set --batch-json \
+    "[{\"path\":\"gateway.tls.enabled\",\"value\":true},{\"path\":\"gateway.tls.autoGenerate\",\"value\":true},{\"path\":\"gateway.auth.token\",\"value\":\"${literal_token}\"}]"
+fi
+
 if [[ "$(env_value OPENCLAW_LAB_UNRESTRICTED)" == "1" ]]; then
   echo "Applying unrestricted lab tool policy..."
   compose run --rm --no-deps --entrypoint node openclaw-gateway \
     dist/index.js config set --batch-json "$(permissive_openclaw_config_json)"
+fi
+
+default_model="$(env_value OPENCLAW_DEFAULT_MODEL)"
+if [[ -n "$default_model" ]]; then
+  echo "Pinning agents.defaults.model to ${default_model}..."
+  compose run --rm --no-deps --entrypoint node openclaw-gateway \
+    dist/index.js config set --batch-json \
+    "[{\"path\":\"agents.defaults.model\",\"value\":\"${default_model}\"}]"
 fi
 
 echo "Starting OpenClaw Gateway..."
@@ -89,7 +111,7 @@ fi
 if [[ -n "${OPENCLAW_COMPOSE_PROJECT:-}" ]]; then
   command_prefix="${command_prefix}OPENCLAW_COMPOSE_PROJECT=${OPENCLAW_COMPOSE_PROJECT} "
 fi
-echo "Gateway URL: http://${public_host}:${gateway_port}/"
+echo "Gateway URL: ${origin_scheme}://${public_host}:${gateway_port}/"
 echo "Health:      ${command_prefix}./scripts/local-docker/health.sh"
 echo "Dashboard:   ${command_prefix}./scripts/local-docker/dashboard.sh"
 echo "Token:       $token"

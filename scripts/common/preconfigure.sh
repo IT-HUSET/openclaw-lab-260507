@@ -74,6 +74,14 @@ lab_unrestricted_enabled() {
   [[ "${enabled:-1}" != "0" ]]
 }
 
+lab_tls_enabled() {
+  local participant_id="$1"
+  local enabled
+
+  enabled="$(lab_value "$participant_id" OPENCLAW_LAB_TLS)"
+  [[ "${enabled:-0}" == "1" ]]
+}
+
 lab_auth_choice() {
   local participant_id="$1"
   local configured
@@ -110,7 +118,7 @@ lab_auth_choice() {
 apply_lab_secrets_to_env_file() {
   local participant_id="$1"
   local target_env="$2"
-  local key value auth_choice unrestricted gemini_value google_value
+  local key value auth_choice unrestricted tls_enabled gemini_value google_value default_model
 
   lab_preconfigure_enabled "$participant_id" || return 0
 
@@ -139,6 +147,17 @@ apply_lab_secrets_to_env_file() {
     unrestricted=1
   fi
   set_env_value_in "$target_env" OPENCLAW_LAB_UNRESTRICTED "$unrestricted"
+
+  tls_enabled=0
+  if lab_tls_enabled "$participant_id"; then
+    tls_enabled=1
+  fi
+  set_env_value_in "$target_env" OPENCLAW_LAB_TLS "$tls_enabled"
+
+  default_model="$(lab_value "$participant_id" OPENCLAW_LAB_DEFAULT_MODEL)"
+  if [[ -n "$default_model" ]]; then
+    set_env_value_in "$target_env" OPENCLAW_DEFAULT_MODEL "$default_model"
+  fi
 }
 
 native_profile_env_file() {
@@ -223,7 +242,8 @@ permissive_openclaw_config_json() {
   {"path":"tools.exec.ask","value":"off"},
   {"path":"tools.exec.applyPatch.workspaceOnly","value":false},
   {"path":"tools.fs.workspaceOnly","value":false},
-  {"path":"browser.ssrfPolicy.dangerouslyAllowPrivateNetwork","value":true}
+  {"path":"browser.ssrfPolicy.dangerouslyAllowPrivateNetwork","value":true},
+  {"path":"gateway.controlUi.dangerouslyDisableDeviceAuth","value":true}
 ]
 EOF
 }

@@ -43,8 +43,10 @@ When `resources/lab-secrets.env` exists and `OPENCLAW_LAB_PRECONFIGURE=1`, the s
 - run `openclaw onboard --non-interactive` with `--secret-input-mode ref`
 - store gateway auth as an `OPENCLAW_GATEWAY_TOKEN` env ref
 - apply the unrestricted lab tool policy when `OPENCLAW_LAB_UNRESTRICTED=1`
+- pin `agents.defaults.model` when `OPENCLAW_LAB_DEFAULT_MODEL` is set (format `provider/model`, e.g. `anthropic/claude-sonnet-4-6`); per-participant overrides use the uppercase id prefix (`P01_OPENCLAW_LAB_DEFAULT_MODEL=...`)
+- enable gateway HTTPS with an auto-generated self-signed cert when `OPENCLAW_LAB_TLS=1`. Required when participants reach the gateway over a non-loopback hostname/IP, because the OpenClaw Control UI requires a browser secure context for device identity. Roster URLs and `controlUi.allowedOrigins` switch to `https://`, and the gateway token is written as a literal value (instead of a SecretRef) so login is reliably enforced. Participants will see a one-time browser warning for the self-signed cert.
 
-The unrestricted policy sets `tools.profile="full"`, disables OpenClaw's tool sandbox, runs exec on the gateway host with `security="full"` and `ask="off"`, disables workspace-only guards for filesystem/apply-patch tools, and allows browser access to private-network targets. Use only on trusted lab hosts with dedicated lab credentials.
+The unrestricted policy sets `tools.profile="full"`, disables OpenClaw's tool sandbox, runs exec on the gateway host with `security="full"` and `ask="off"`, disables workspace-only guards for filesystem/apply-patch tools, allows browser access to private-network targets, and disables Control UI device-pairing checks (`gateway.controlUi.dangerouslyDisableDeviceAuth`) so participants only need the gateway token. Use only on trusted lab hosts with dedicated lab credentials.
 
 ## Local Docker Prep
 

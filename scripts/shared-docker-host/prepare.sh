@@ -99,7 +99,11 @@ for i in $(seq 1 "$COUNT"); do
   else
     onboarding_command="./scripts/shared-docker-host/setup-instance.sh $participant_id $gateway_port $HOST_NAME $PUBLISH_HOST"
   fi
-  url="http://${HOST_NAME}:${gateway_port}/"
+  if lab_tls_enabled "$participant_id"; then
+    url="https://${HOST_NAME}:${gateway_port}/"
+  else
+    url="http://${HOST_NAME}:${gateway_port}/"
+  fi
   printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
     "$participant_id" \
     "$gateway_port" \
